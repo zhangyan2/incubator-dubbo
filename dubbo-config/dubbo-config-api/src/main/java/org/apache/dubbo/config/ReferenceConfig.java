@@ -157,6 +157,13 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         return urls;
     }
 
+    /**
+     * 1.进一步初始化 ReferenceConfig 对象。
+     * 2.校验 ReferenceConfig 对象的配置项。
+     * 3.使用 ReferenceConfig 对象，生成 Dubbo URL 对象数组。
+     * 4.使用 Dubbo URL 对象，应用服务。
+     * @return
+     */
     public synchronized T get() {
         if (destroyed) {
             throw new IllegalStateException("Already destroyed!");
@@ -193,7 +200,9 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             throw new IllegalStateException("<dubbo:reference interface=\"\" /> interface not allow null!");
         }
         // get consumer's global configuration
+        // 读取属性配置( 环境变量 + properties 属性 )到 ConsumerConfig 对象。
         checkDefault();
+        // 读取属性配置( 环境变量 + properties 属性 )到 ReferenceConfig 对象（自己）
         appendProperties(this);
         if (getGeneric() == null && getConsumer() != null) {
             setGeneric(getConsumer().getGeneric());
@@ -249,6 +258,8 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 }
             }
         }
+        // 从 ConsumerConfig、ModuleConfig、ApplicationConfig 配置对象，
+        // 复制 application module registries monitor 给 ReferenceConfig ( 自己 )。
         if (consumer != null) {
             if (application == null) {
                 application = consumer.getApplication();
@@ -281,9 +292,11 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         }
         checkApplication();
         checkStubAndMock(interfaceClass);
+        // 创建参数集合 map ，用于下面创建 Dubbo URL 的 parameters 属性。
         Map<String, String> map = new HashMap<String, String>();
         resolveAsyncInterface(interfaceClass, map);
 
+        // 将 side dubbo timestamp timestamp pid 添加到 map 中。
         map.put(Constants.SIDE_KEY, Constants.CONSUMER_SIDE);
         map.put(Constants.DUBBO_VERSION_KEY, Version.getProtocolVersion());
         map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
@@ -304,6 +317,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 map.put("methods", StringUtils.join(new HashSet<String>(Arrays.asList(methods)), ","));
             }
         }
+        // 调用 #appendParameters(map, config) 方法，将各种配置对象添加到 map 中
         map.put(Constants.INTERFACE_KEY, interfaceName);
         appendParameters(map, application);
         appendParameters(map, module);
@@ -336,6 +350,7 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         }
         map.put(Constants.REGISTER_IP_KEY, hostToRegistry);
 
+        // 创建代理
         ref = createProxy(map);
         ConsumerModel consumerModel = new ConsumerModel(getUniqueServiceName(), ref, interfaceClass.getMethods());
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
