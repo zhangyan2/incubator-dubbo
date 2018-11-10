@@ -35,6 +35,7 @@ class InjvmExporter<T> extends AbstractExporter<T> {
         super(invoker);
         this.key = key;
         this.exporterMap = exporterMap;
+        // 添加到暴露服务的集合中
         exporterMap.put(key, this);
     }
 

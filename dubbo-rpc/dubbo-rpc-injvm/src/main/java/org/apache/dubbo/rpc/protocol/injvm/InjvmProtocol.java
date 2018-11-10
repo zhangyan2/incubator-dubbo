@@ -34,8 +34,10 @@ import java.util.Map;
  */
 public class InjvmProtocol extends AbstractProtocol implements Protocol {
 
+    // 协议名
     public static final String NAME = Constants.LOCAL_PROTOCOL;
 
+    // 默认端口
     public static final int DEFAULT_PORT = 0;
     private static InjvmProtocol INSTANCE;
 
@@ -43,6 +45,7 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
         INSTANCE = this;
     }
 
+    // 通SPI加载一次, 单例
     public static InjvmProtocol getInjvmProtocol() {
         if (INSTANCE == null) {
             ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(InjvmProtocol.NAME); // load
@@ -81,6 +84,7 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
         return DEFAULT_PORT;
     }
 
+    // 创建 InjvmExporter 对象。
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         return new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);

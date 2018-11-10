@@ -111,7 +111,7 @@ public class ExtensionLoader<T> {
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
 
     /**
-     * 拓展名与 @Activate 的映射
+     * 拓展名与 @Activate 的映射, 在过滤器那块使用
      */
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<String, Object>();
     /**
