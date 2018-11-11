@@ -46,6 +46,7 @@ public interface Protocol {
      * @return exporter reference for exported service, useful for unexport the service later
      * @throws RpcException thrown when error occurs during export the service, for example: port is occupied
      */
+    // 标记在拓展接口的方法上，代表自动生成代码实现该接口的 Adaptive 拓展实现类
     @Adaptive
     <T> Exporter<T> export(Invoker<T> invoker) throws RpcException;
 

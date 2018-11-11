@@ -528,7 +528,7 @@ public class ExtensionLoader<T> {
                     instance = cachedAdaptiveInstance.get();
                     if (instance == null) {
                         try {
-                            // 创建自适应扩展对象
+                            // 创建自适应扩展对象(動態生成入口)
                             instance = createAdaptiveExtension();
                             // 设置到缓存
                             cachedAdaptiveInstance.set(instance);
@@ -667,6 +667,7 @@ public class ExtensionLoader<T> {
     // synchronized in getExtensionClasses
     private Map<String, Class<?>> loadExtensionClasses() {
         // 通过@SPI注解, 获取默认的拓展实现类名
+        // @SPI("dubbo") 比如Protocol默认是DubboProtocol
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation != null) {
             String value = defaultAnnotation.value();
@@ -694,7 +695,7 @@ public class ExtensionLoader<T> {
     }
 
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir, String type) {
-        String fileName = dir + type;
+        String fileName = dir + type; // META-INF/dubbo/internal/org.apache.dubbo.rpc.Protocol
         try {
             Enumeration<java.net.URL> urls;
             ClassLoader classLoader = findClassLoader();
@@ -720,7 +721,7 @@ public class ExtensionLoader<T> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(resourceURL.openStream(), "utf-8"));
             try {
                 String line;
-                while ((line = reader.readLine()) != null) {
+                while ((line = reader.readLine()) != null) { // injvm=org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol
                     final int ci = line.indexOf('#');
                     if (ci >= 0) {
                         line = line.substring(0, ci);
@@ -731,8 +732,8 @@ public class ExtensionLoader<T> {
                             String name = null;
                             int i = line.indexOf('=');
                             if (i > 0) {
-                                name = line.substring(0, i).trim();
-                                line = line.substring(i + 1).trim();
+                                name = line.substring(0, i).trim(); // injvm
+                                line = line.substring(i + 1).trim(); //org.apache.dubbo.rpc.protocol.injvm.InjvmProtocol
                             }
                             if (line.length() > 0) {
                                 loadClass(extensionClasses, resourceURL, Class.forName(line, true, classLoader), name);
@@ -853,6 +854,7 @@ public class ExtensionLoader<T> {
      * @return
      */
     private Class<?> getAdaptiveExtensionClass() {
+        // 获取拓展实现类数组
         getExtensionClasses();
         // 如果缓存的自适应拓展类存在. 直接返回
         if (cachedAdaptiveClass != null) {
